@@ -18,14 +18,10 @@
 		"default_title": "page finder",
 		"default_popup": "popup.htm"
 	},
-	"background": {
-		"page": "background.htm",
-		"persistent": true
-	},
 	"permissions": [
+		"<all_urls>",
+		"activeTab",
 		"tabs",
-		"http://*/*",
-		"https://*/*",
 		"storage",
 		"notifications"
 	]
