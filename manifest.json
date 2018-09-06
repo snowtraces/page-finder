@@ -1,0 +1,32 @@
+{
+	"manifest_version": 2,
+	"name": "page finder",
+	"version": "1.0.0",
+	"description": "页面内容查找",
+	"icons": {
+		"16": "images/search16.png",
+		"32": "images/search32.png",
+		"48": "images/search48.png",
+		"64": "images/search64.png",
+		"128": "images/search128.png"
+	},
+	"browser_action": {
+		"default_icon": {
+			"24": "images/search24.png",
+			"48": "images/search48.png"
+		},
+		"default_title": "page finder",
+		"default_popup": "popup.htm"
+	},
+	"background": {
+		"page": "background.htm",
+		"persistent": true
+	},
+	"permissions": [
+		"tabs",
+		"http://*/*",
+		"https://*/*",
+		"storage",
+		"notifications"
+	]
+}

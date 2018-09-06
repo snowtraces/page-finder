@@ -1,0 +1,33 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-text-size-adjust: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+    font-size: 14px;
+}
+
+html {
+    font-size: 16px;
+    height: 100%;
+}
+
+input,
+button,
+select {
+    font-size: 1em;
+    border-radius: 3px;
+}
+
+body {
+    height: 100%;
+}
+
+.green {
+    color: #0b0;
+}
+
+.red {
+    color: red;
+}
