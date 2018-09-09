@@ -33,9 +33,12 @@ function domAdd() {
     // 读取图片，写入内层div
     var imgs = document.querySelectorAll('img')
     var flag = false
+    var _srcArr = []
     imgs.forEach(function(img){
         var src = img.getAttribute('src')
-        if(src) {
+
+        if(src && _srcArr.indexOf(src) == -1) {
+            _srcArr.push(src)
             flag = true
             var _div = document.createElement('div')
             _div.classList.add('page-img')
@@ -63,8 +66,6 @@ function domAdd() {
         operation.classList.add('page-finder-operation')
         operation.innerText = '✕'
         _add.appendChild(operation)
-       
-
 
         document.querySelector('body').appendChild(_addWrap)
 
@@ -81,11 +82,15 @@ function addDetail(){
         var _height = img.naturalHeight
         var _width = img.naturalWidth
 
-        var _detail = document.createElement('div')
+        var _detail = document.createElement('a')
         _detail.classList.add('detail')
+        _detail.href = 'javascript:;'
+        _detail.setAttribute('data-src', img.src)
+        _detail.setAttribute('download','')
         _detail.innerText = _width + '✕' + _height
         imgBox.appendChild(_detail)
 
+        _detail.addEventListener('click', downloadImage)
     })
 }
 
@@ -94,8 +99,8 @@ function addStyle(){
     var _style = document.createElement('style')
 
     var style = '.page-finder-add-wrap {' + 
-        'z-index: 9999; box-sizing: border-box; position:fixed; width:auto; right: 10px; bottom: 10px;' + 
-        'border: 1px solid #ccc; background: #278; padding: 5px; max-height: 35%; max-width:50%; display: flex; box-shadow: 4px 3px 10px #aaa' + 
+        'z-index: 9999; box-sizing: border-box; position:fixed; width:auto; right: 32px; bottom: 32px; border: none; border-radius: 2px;' + 
+        'border: 1px solid #ccc; background: #009688; padding: 5px; max-height: 35%; max-width:75%; display: flex;' + 
         '}\n'
     style += '.page-finder-add {' + 
         'display: flex; flex-wrap: wrap; overflow: auto ' + 
@@ -105,13 +110,13 @@ function addStyle(){
         'font-size: 20px; line-height: 30px; opacity: .85; cursor: pointer' +
         '}\n'
     style += '.page-finder-add .page-img {' +
-        'padding:5px; height: 64px; width: auto; max-width: 192px; overflow: hidden; position: relative; ' + 
+        'padding:5px; height: 64px; width: auto; max-width: 100%; overflow: hidden; position: relative; ' + 
         '}\n'
     style += '.page-finder-add .page-img img {' +
-        'height: 100%; background: #fff; cursor:pointer; ' + 
+        'height: 100%; background: #ccc; cursor:pointer; ' + 
         '}\n'
     style += '.page-finder-add-wrap .show-box {' +
-        'position: absolute; left: 0; top: -128px; height: 128px; width: auto; max-width: 384px; background: #999; overflow: hidden; ' + 
+        'position: absolute; left: 0; top: -266px; height: 256px; width: auto; background: #009688; overflow: hidden;' + 
         '}\n'
     style += '.page-finder-add-wrap .show-box img {' +
         'height: 100%;' + 
@@ -122,6 +127,50 @@ function addStyle(){
 
     _style.innerText = style
     document.querySelector('.page-finder-add-wrap').appendChild(_style)
+}
+
+
+function getBlob(url) {
+    return new Promise(resolve => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                resolve(xhr.response);
+            }
+        };
+
+        xhr.send();
+    });
+}
+
+function saveAs(blob, filename) {
+    if (window.navigator.msSaveOrOpenBlob) {
+        navigator.msSaveBlob(blob, filename);
+    } else {
+        const link = document.createElement('a');
+        const body = document.querySelector('body');
+
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename || '';
+
+        link.style.display = 'none';
+        body.appendChild(link);
+        
+        link.click();
+        link.remove();
+
+        window.URL.revokeObjectURL(link.href);
+    }
+}
+
+function downloadImage(){
+    var url = this.getAttribute('data-src')
+    getBlob(url).then(blob => {
+        saveAs(blob);
+    });
 }
 
 domAdd()
