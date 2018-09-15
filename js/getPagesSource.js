@@ -11,7 +11,7 @@ function removeOld(){
     }
 }
 
-function domAdd() {
+function addDom() {
     removeOld()
 
     // 创建外层div
@@ -36,6 +36,7 @@ function domAdd() {
     var _srcArr = []
     imgs.forEach(function(img){
         var src = img.getAttribute('src')
+        var name = getImageName(img)
 
         if(src && _srcArr.indexOf(src) == -1) {
             _srcArr.push(src)
@@ -45,7 +46,11 @@ function domAdd() {
     
             var _img = document.createElement('img')
             _img.setAttribute('src', src)
+            _img.setAttribute('alt', name)
             _div.appendChild(_img)
+
+            // TODO get image name
+            
     
             _add.appendChild(_div)
 
@@ -81,11 +86,13 @@ function addDetail(){
         var img = imgBox.querySelector('img')
         var _height = img.naturalHeight
         var _width = img.naturalWidth
+        var _name = img.getAttribute('alt')
 
         var _detail = document.createElement('a')
         _detail.classList.add('detail')
         _detail.href = 'javascript:;'
         _detail.setAttribute('data-src', img.src)
+        _detail.setAttribute('title', _name)
         _detail.setAttribute('download','')
         _detail.innerText = _width + '✕' + _height
         imgBox.appendChild(_detail)
@@ -129,6 +136,22 @@ function addStyle(){
     document.querySelector('.page-finder-add-wrap').appendChild(_style)
 }
 
+function getImageName(img){
+    var name = ''
+    var src = img.getAttribute('src')
+    var alt = img.getAttribute('alt')
+    if(src && !src.startsWith('data:')) {
+        var lastIndex = src.lastIndexOf('/')
+        if(lastIndex > 0) {
+            name = src.substring(lastIndex + 1, src.length)
+        } else {
+            name = src
+        }
+    } else if(alt) {
+        name = alt
+    }
+    return name
+}
 
 function getBlob(url) {
     return new Promise(resolve => {
@@ -147,6 +170,7 @@ function getBlob(url) {
 }
 
 function saveAs(blob, filename) {
+    filename = filename || ''
     if (window.navigator.msSaveOrOpenBlob) {
         navigator.msSaveBlob(blob, filename);
     } else {
@@ -154,7 +178,7 @@ function saveAs(blob, filename) {
         const body = document.querySelector('body');
 
         link.href = window.URL.createObjectURL(blob);
-        link.download = filename || '';
+        link.download = filename;
 
         link.style.display = 'none';
         body.appendChild(link);
@@ -168,11 +192,12 @@ function saveAs(blob, filename) {
 
 function downloadImage(){
     var url = this.getAttribute('data-src')
+    var name = this.getAttribute('title')
     getBlob(url).then(blob => {
-        saveAs(blob);
+        saveAs(blob, name);
     });
 }
 
-domAdd()
+addDom()
 addDetail()
 addStyle()
