@@ -4,65 +4,71 @@ function DOMtoString() {
     return html;
 }
 
+/**
+ * 移除旧数据
+ */
 function removeOld() {
-    var _old = document.querySelector('.page-finder-add-wrap')
-    if (_old) {
-        _old.remove()
+    var oldContainer = document.querySelector('.page-finder-add-wrap')
+    if (oldContainer) {
+        oldContainer.remove()
     }
 }
 
+/**
+ * 添加内容
+ */
 function addDom() {
     removeOld()
 
     // 创建外层div
-    var _addWrap = document.createElement('div')
-    _addWrap.classList.add('page-finder-add-wrap')
+    var container = document.createElement('div')
+    container.classList.add('page-finder-add-wrap')
 
     // 创建展示div
-    var _show = document.createElement('div')
-    _show.classList.add('show-box')
-    var _showImg = document.createElement('img')
-    _show.appendChild(_showImg)
-    _addWrap.appendChild(_show)
+    var zoomShow = document.createElement('div')
+    zoomShow.classList.add('show-box')
+    var showImg = document.createElement('img')
+    zoomShow.appendChild(showImg)
+    container.appendChild(zoomShow)
 
     // 创建内层列表div
-    var _add = document.createElement('div')
-    _add.classList.add('page-finder-add')
-    _addWrap.appendChild(_add)
+    var innerContainer = document.createElement('div')
+    innerContainer.classList.add('page-finder-add')
+    container.appendChild(innerContainer)
 
     // 读取图片，写入内层div
     var imgs = document.querySelectorAll('img')
     var flag = false
-    var _srcArr = []
-    var _imgData = []
+    var srcArr = []
+    var downdList = []
     imgs.forEach(function (img) {
-        var src = img.getAttribute('src')
+        var src = img.src
         var name = getImageName(img)
 
-        if (src && _srcArr.indexOf(src) == -1) {
+        if (src && srcArr.indexOf(src) == -1) {
             var o = {}
             o.src = src
             o.name = name
-            _imgData.push(o)
-            _srcArr.push(src)
+            downdList.push(o)
+            srcArr.push(src)
 
             flag = true
-            var _div = document.createElement('div')
-            _div.classList.add('page-img')
+            var single = document.createElement('div')
+            single.classList.add('page-img')
 
-            var _img = document.createElement('img')
-            _img.setAttribute('src', src)
-            _img.setAttribute('alt', name)
-            _div.appendChild(_img)
+            var singleImg = document.createElement('img')
+            singleImg.setAttribute('src', src)
+            singleImg.setAttribute('alt', name)
+            single.appendChild(singleImg)
 
-            _add.appendChild(_div)
+            innerContainer.appendChild(single)
 
-            _img.addEventListener('click', function () {
-                _showSrc = _showImg.getAttribute('src')
-                if (_showSrc == src) {
-                    _showImg.removeAttribute('src')
+            singleImg.addEventListener('click', function () {
+                showSrc = showImg.src
+                if (showSrc == src) {
+                    showImg.removeAttribute('src')
                 } else {
-                    _showImg.setAttribute('src', src)
+                    showImg.setAttribute('src', src)
                 }
             }, false)
         }
@@ -73,54 +79,58 @@ function addDom() {
         var operation = document.createElement('div')
         operation.classList.add('page-finder-operation')
         operation.innerText = '✕'
-        _add.appendChild(operation)
+        innerContainer.appendChild(operation)
 
-        document.querySelector('body').appendChild(_addWrap)
+        document.querySelector('body').appendChild(container)
 
         operation.addEventListener('click', function () {
-            _addWrap.remove()
+            container.remove()
         }, false)
 
         // 批量下载按钮
         var batchDownload = document.createElement('div')
         batchDownload.classList.add('page-finder-batchDownload')
         batchDownload.innerText = '⇥'
-        _add.appendChild(batchDownload)
+        innerContainer.appendChild(batchDownload)
 
         batchDownload.addEventListener('click', function () {
-            _imgData.forEach(function (item) {
+            downdList.forEach(function (item) {
                 getBlob(item.src).then(blob => {
                     saveAs(blob, item.name);
                 });
             })
-        })
+        }, false)
     }
 }
 
+/**
+ * 添加详情
+ */
 function addDetail() {
     var imgBoxs = document.querySelectorAll('.page-finder-add-wrap .page-img')
     imgBoxs.forEach(function (imgBox) {
         var img = imgBox.querySelector('img')
-        var _height = img.naturalHeight
-        var _width = img.naturalWidth
-        var _name = img.getAttribute('alt')
+        var height = img.naturalHeight
+        var width = img.naturalWidth
+        var name = img.alt
+        var src = img.src
 
-        var _detail = document.createElement('a')
-        _detail.classList.add('detail')
-        _detail.href = 'javascript:;'
-        _detail.setAttribute('data-src', img.src)
-        _detail.setAttribute('title', _name)
-        _detail.setAttribute('download', '')
-        _detail.innerText = _width + '✕' + _height
-        imgBox.appendChild(_detail)
+        var detail = document.createElement('a')
+        detail.classList.add('detail')
+        detail.href = 'javascript:;'
+        detail.setAttribute('data-src', src)
+        detail.setAttribute('title', name)
+        detail.setAttribute('download', '')
+        detail.innerText = width + '✕' + height
+        imgBox.appendChild(detail)
 
-        _detail.addEventListener('click', downloadImage)
+        detail.addEventListener('click', downloadImage)
     })
 }
 
 function addStyle() {
     // style 代码块
-    var _style = document.createElement('style')
+    var styleBlock = document.createElement('style')
 
     var style = '.page-finder-add-wrap {' +
         'z-index: 9999; box-sizing: border-box; position:fixed; width:auto; right: 32px; bottom: 32px; border: none; border-radius: 2px;' +
@@ -153,14 +163,14 @@ function addStyle() {
         'position: absolute; right: 5px; bottom: 5px; background: rgba(64, 64, 64, .7); color: #ddd; font-size: 8px' +
         '}\n'
 
-    _style.innerText = style
-    document.querySelector('.page-finder-add-wrap').appendChild(_style)
+        styleBlock.innerText = style
+    document.querySelector('.page-finder-add-wrap').appendChild(styleBlock)
 }
 
 function getImageName(img) {
     var name = ''
-    var src = img.getAttribute('src')
-    var alt = img.getAttribute('alt')
+    var src = img.src
+    var alt = img.alt
     if (src && !src.startsWith('data:')) {
         var lastIndex = src.lastIndexOf('/')
         if (lastIndex > 0) {
