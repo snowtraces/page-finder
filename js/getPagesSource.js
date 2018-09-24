@@ -44,7 +44,6 @@ function addDom() {
     imgs.forEach(function (img) {
         var src = img.src
         var name = getImageName(img)
-
         if (src && srcArr.indexOf(src) == -1) {
             var o = {}
             o.src = src
@@ -95,6 +94,7 @@ function addDom() {
 
         batchDownload.addEventListener('click', function () {
             downdList.forEach(function (item) {
+                item = customSrcRule(item)
                 getBlob(item.src).then(blob => {
                     saveAs(blob, item.name);
                 });
@@ -102,6 +102,27 @@ function addDom() {
         }, false)
     }
 }
+
+// 根据不同站点定义不同的规则
+function customSrcRule(img) {
+    var src = img.src
+    if (src.indexOf('.wixstatic.com') > -1 && src.indexOf('.jpg/') > -1) {
+        img.src = src.substring(0, src.lastIndexOf('.jpg/') + 4)
+        var name = getImageName(img)
+        var box = document.querySelector(`div[data-displayer-uri="${name}"]`)
+        if (!box) {
+            box = document.querySelector(`img[src="${src}"]`).parentElement.parentElement
+        }
+        if(box && box.querySelector('div[itemprop="description"]') && box.querySelector('div[itemprop="description"]')){
+            var trueName = box.querySelector('div[itemprop="name"]').innerText + ' -- ' +
+                box.querySelector('div[itemprop="description"]').innerText
+            name = trueName ? trueName + ".jpg" : name
+        }
+        img.name = name
+    }
+    return img
+}
+
 
 /**
  * 添加详情
@@ -133,7 +154,7 @@ function addStyle() {
     var styleBlock = document.createElement('style')
 
     var style = '.page-finder-add-wrap {' +
-        'z-index: 9999; box-sizing: border-box; position:fixed; width:auto; right: 32px; bottom: 32px; border: none; border-radius: 2px;' +
+        'z-index: 999999; box-sizing: border-box; position:fixed; width:auto; right: 32px; bottom: 32px; border: none; border-radius: 2px;' +
         'border: 1px solid #ccc; background: #009688; padding: 5px; max-height: 35%; max-width:75%; display: flex;' +
         '}\n'
     style += '.page-finder-add {' +
@@ -163,7 +184,7 @@ function addStyle() {
         'position: absolute; right: 5px; bottom: 5px; background: rgba(64, 64, 64, .7); color: #ddd; font-size: 8px' +
         '}\n'
 
-        styleBlock.innerText = style
+    styleBlock.innerText = style
     document.querySelector('.page-finder-add-wrap').appendChild(styleBlock)
 }
 
@@ -175,11 +196,14 @@ function getImageName(img) {
         var lastIndex = src.lastIndexOf('/')
         if (lastIndex > 0) {
             name = src.substring(lastIndex + 1, src.length)
+            if(name.indexOf('?') > -1) {
+                name = name.substring(0, name.indexOf('?'))
+            }
         } else {
             name = src
         }
     } else if (alt) {
-        name = alt
+        name = alt + ".jpg"
     }
     return name
 }
